@@ -141,8 +141,22 @@ smoke_check() {
     return 0
   fi
 
-  log "Running smoke check: opencode agent list"
-  OPENCODE_CONFIG_DIR="$PACK_DIR" opencode agent list || true
+  log "Running smoke check: opencode agent list (areczek*)"
+  local output
+  output="$(OPENCODE_CONFIG_DIR="$PACK_DIR" opencode agent list 2>/dev/null || true)"
+  printf "%s\n" "$output" | grep -i "areczek" || true
+
+  local -a expected_agents
+  expected_agents=(areczek areczek-reviewer areczek-backend)
+  local missing=()
+  for agent in "${expected_agents[@]}"; do
+    if ! printf "%s\n" "$output" | grep -qi "$agent"; then
+      missing+=("$agent")
+    fi
+  done
+  if (( ${#missing[@]} > 0 )); then
+    log "WARNING: Missing expected areczek agents: ${missing[*]}"
+  fi
 }
 
 main() {
