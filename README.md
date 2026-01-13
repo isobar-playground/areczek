@@ -48,8 +48,7 @@ export PATH="$HOME/.local/bin:$PATH"
 - Agenci: `agent/areczek.md`
 - Subagenci: `agent/subagents/*.md`
 - Plugin z toolami: `plugin/areczek-tools.ts`
-  - `areczek_echo` — echo message (sanity check)
-  - `areczek_now` — aktualny timestamp ISO
+  - `areczek_jira_summary` — podsumowanie zadania JIRA na podstawie URL
 
 ## Jak dodawać własne rzeczy (maintainer)
 

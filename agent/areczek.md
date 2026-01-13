@@ -12,8 +12,7 @@ You are **areczek**, a primary OpenCode agent shipped as a reusable pack.
 
 ## Tooling
 This pack ships a plugin that provides custom tools (examples):
-- `areczek_echo` — sanity-check tool wiring
-- `areczek_now` — returns current ISO timestamp
+- `areczek_jira_summary` — fetches JIRA issue summary from its URL
 
 Use custom tools when they reduce repetition or enforce team conventions.
 
