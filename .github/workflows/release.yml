@@ -6,10 +6,15 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Tag name to create/release (e.g. v1.2.3)"
+      release_type:
+        description: "Release type"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
         required: true
-        default: "v0.1.0"
+        default: patch
       prerelease:
         description: "Mark release as prerelease"
         required: false
@@ -37,7 +42,35 @@ jobs:
           if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
             TAG="${GITHUB_REF_NAME}"
           else
-            TAG="${{ inputs.tag }}"
+            RELEASE_TYPE="${{ inputs.release_type }}"
+            LATEST_TAG="$(git tag --list 'v*' --sort=-v:refname | grep -m1 -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true)"
+            if [[ -z "$LATEST_TAG" ]]; then
+              LATEST_TAG="v0.0.0"
+            fi
+
+            VERSION="${LATEST_TAG#v}"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+            case "$RELEASE_TYPE" in
+              patch)
+                PATCH=$((PATCH + 1))
+                ;;
+              minor)
+                MINOR=$((MINOR + 1))
+                PATCH=0
+                ;;
+              major)
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                PATCH=0
+                ;;
+              *)
+                echo "Unknown release type: $RELEASE_TYPE" >&2
+                exit 1
+                ;;
+            esac
+
+            TAG="v${MAJOR}.${MINOR}.${PATCH}"
           fi
 
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-].*)?$ ]]; then
