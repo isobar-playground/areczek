@@ -80,8 +80,18 @@ jobs:
           rm -rf dist pack
           mkdir -p dist pack
 
+          # Ensure optional directories exist in the pack even if empty
+          mkdir -p pack/tool pack/command pack/context
+
           # Pack contents for OPENCODE_CONFIG_DIR installs (no top-level folder)
-          cp -R agent plugin tool command context pack/
+          cp -R agent plugin pack/
+
+          for dir in tool command context; do
+            if [[ -d "$dir" ]]; then
+              cp -R "$dir" pack/
+            fi
+          done
+
           cp package.json README.md install.sh pack/
 
           echo "$TAG" > pack/VERSION
