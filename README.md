@@ -17,7 +17,7 @@ To polecenie:
 - zainstaluje wrapper `~/.local/bin/opencode-areczek`
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/isobar-playground/areczek/master/install.sh | bash
+curl -fsSL https://github.com/isobar-playground/areczek/releases/latest/download/install.sh | bash
 ```
 
 ### Uruchomienie
@@ -71,7 +71,7 @@ Jeśli chcesz dodać nowe narzędzie, dopisz je w mapie `tool: { ... }` w tym pl
 Instalator jest idempotentny — uruchom ponownie to samo polecenie:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/isobar-playground/areczek/master/install.sh | bash
+curl -fsSL https://github.com/isobar-playground/areczek/releases/latest/download/install.sh | bash
 ```
 
 Jeśli pack już istnieje, instalator robi backup katalogu:

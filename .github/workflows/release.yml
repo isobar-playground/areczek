@@ -63,7 +63,35 @@ jobs:
 
           git push origin "$TAG"
 
-      - name: Create GitHub release
+      - name: Checkout tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.vars.outputs.tag }}"
+          git checkout "$TAG"
+
+      - name: Build release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${{ steps.vars.outputs.tag }}"
+
+          rm -rf dist pack
+          mkdir -p dist pack
+
+          # Pack contents for OPENCODE_CONFIG_DIR installs (no top-level folder)
+          cp -R agent plugin tool command context pack/
+          cp package.json README.md install.sh pack/
+
+          echo "$TAG" > pack/VERSION
+
+          tar -czf dist/areczek-pack.tgz -C pack .
+
+          # Uploadable installer (kept separate so curl can target releases/latest)
+          cp install.sh dist/install.sh
+
+      - name: Create GitHub release (idempotent)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -71,6 +99,11 @@ jobs:
           set -euo pipefail
 
           TAG="${{ steps.vars.outputs.tag }}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release already exists: $TAG"
+            exit 0
+          fi
 
           FLAGS=("--title" "$TAG" "--generate-notes")
 
@@ -81,3 +114,17 @@ jobs:
           fi
 
           gh release create "$TAG" "${FLAGS[@]}"
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${{ steps.vars.outputs.tag }}"
+
+          gh release upload "$TAG" \
+            dist/areczek-pack.tgz \
+            dist/install.sh#install.sh \
+            --clobber

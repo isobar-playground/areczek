@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Areczek OpenCode Pack installer (latest)
+# Areczek OpenCode Pack installer (latest stable)
 # Installs:
 # - Pack to:   ~/.config/opencode-packs/areczek
 # - Wrapper:   ~/.local/bin/opencode-areczek
 # Also installs OpenCode if missing.
+#
+# By default, downloads the pack from the latest GitHub Release asset.
 
 REPO_OWNER="isobar-playground"
 REPO_NAME="areczek"
-REPO_BRANCH="master"
+REPO_BRANCH="master" # fallback only
 PACK_NAME="areczek"
+PACK_ASSET="areczek-pack.tgz"
 
 PACK_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/opencode-packs"
 PACK_DIR="$PACK_ROOT/$PACK_NAME"
@@ -61,23 +64,40 @@ install_pack() {
   tmp="$(mktemp -d)"
 
   local url
-  url="https://codeload.github.com/${REPO_OWNER}/${REPO_NAME}/tar.gz/refs/heads/${REPO_BRANCH}"
+  url="https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/latest/download/${PACK_ASSET}"
 
-  log "Downloading pack from: $url"
-  curl -fsSL "$url" -o "$tmp/pack.tgz"
+  log "Downloading pack (latest release) from: $url"
 
-  tar -xzf "$tmp/pack.tgz" -C "$tmp"
+  if ! curl -fsSL "$url" -o "$tmp/pack.tgz"; then
+    log "WARNING: Could not download latest release asset. Falling back to branch tarball (${REPO_BRANCH})."
 
-  # GitHub tarballs unpack as: <repo>-<branch>/
-  local src_dir
-  src_dir="$tmp/${REPO_NAME}-${REPO_BRANCH}"
+    url="https://codeload.github.com/${REPO_OWNER}/${REPO_NAME}/tar.gz/refs/heads/${REPO_BRANCH}"
+    log "Downloading pack (fallback) from: $url"
+    curl -fsSL "$url" -o "$tmp/pack.tgz"
 
-  [[ -d "$src_dir" ]] || die "Unexpected archive layout. Missing: $src_dir"
+    tar -xzf "$tmp/pack.tgz" -C "$tmp"
+
+    # GitHub tarballs unpack as: <repo>-<branch>/
+    local src_dir
+    src_dir="$tmp/${REPO_NAME}-${REPO_BRANCH}"
+
+    [[ -d "$src_dir" ]] || die "Unexpected archive layout. Missing: $src_dir"
+
+    backup_existing_pack_if_present
+    mv "$src_dir" "$PACK_DIR"
+
+    rm -rf "$tmp"
+
+    log "Installed pack to: $PACK_DIR"
+    return 0
+  fi
+
+  mkdir -p "$tmp/pack"
+  tar -xzf "$tmp/pack.tgz" -C "$tmp/pack"
 
   backup_existing_pack_if_present
 
-  # Atomic-ish install: move into place
-  mv "$src_dir" "$PACK_DIR"
+  mv "$tmp/pack" "$PACK_DIR"
 
   rm -rf "$tmp"
 
