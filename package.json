@@ -1,0 +1,8 @@
+{
+  "name": "areczek-opencode-pack",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.1.0"
+  }
+}
