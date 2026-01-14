@@ -46,9 +46,27 @@ export PATH="$HOME/.local/bin:$PATH"
 ## Co jest w paczce
 
 - Agenci: `agent/areczek.md`
-- Subagenci: `agent/subagents/*.md`
+- Subagenci: `agent/subagents/*.md` (m.in. `januszek`, `aireczek`, `anetka`)
 - Plugin z toolami: `plugin/areczek-tools.ts`
   - `areczek_jira_summary` — podsumowanie zadania JIRA na podstawie URL
+
+## Przepływ pracy (Areczek + subagenci)
+
+1. Areczek pobiera ticket JIRA (używając `areczek_jira_summary`), zbiera kontekst projektu i uruchamia Januszka.
+2. Januszek tworzy PRD dla ticketu (w runtime, nie część packa).
+3. Areczek analizuje PRD i strukturę repo, generuje małą feature listę (`feature_list_{TICKET}.json`) i odpala AIreczka.
+4. AIreczek realizuje tylko ok. 10–20% zadań (min. jedno), oznacza je jako `passes=true` po testach i proponuje commit.
+5. Gdy wszystkie zadania mają `passes=true`, Anetka uruchamia regresję/testy całościowe i raportuje wynik.
+
+## Artefakty runtime (tworzone przy zleceniu, nie w repo packa)
+
+- PRD: `prd_{TICKET}.md`
+- Feature lista: `feature_list_{TICKET}.json`
+- Runbook startu (gdy brak instrukcji): `runbook_{TICKET}.md`
+- Raport testów końcowych: `test-report_{TICKET}.md`
+
+Domyślny katalog roboczy dla tych plików to `./context/` w aktywnym projekcie. Jeśli repo nie powinno ich śledzić, poproś Areczka o dodanie do `.gitignore` lub wskaż inną lokalizację.
+Alternatywnie możesz poprosić o lokalne ignorowanie w `.git/info/exclude`, jeśli nie chcesz commitować wzorców.
 
 ## Jak dodawać własne rzeczy (maintainer)
 
