@@ -19,6 +19,7 @@ PACK_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/opencode-packs"
 PACK_DIR="$PACK_ROOT/$PACK_NAME"
 BIN_DIR="$HOME/.local/bin"
 WRAPPER_PATH="$BIN_DIR/opencode-areczek"
+OPENCODE_CMD=""
 
 log()  { printf '%s\n' "$*"; }
 die()  { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
@@ -28,8 +29,63 @@ need() {
   have "$1" || die "Missing required command: $1"
 }
 
-install_opencode_if_missing() {
+locate_opencode_bin_dir() {
+  # 1) If already on PATH, use that (covers reuse + login shells).
   if have opencode; then
+    dirname "$(command -v opencode)"
+    return 0
+  fi
+
+  # 2) Common installer targets (documented by OpenCode installer).
+  local -a candidates=(
+    "${OPENCODE_BIN_DIR:-}"
+    "$HOME/.opencode/bin"
+    "$HOME/.local/bin"
+  )
+  local dir
+  for dir in "${candidates[@]}"; do
+    if [[ -n "$dir" && -x "$dir/opencode" ]]; then
+      printf '%s\n' "$dir"
+      return 0
+    fi
+  done
+
+  # 3) Last resort: shallow search under $HOME (non-fatal if find is absent).
+  if have find; then
+    local found
+    found="$(find "$HOME" -maxdepth 4 -type f -name opencode -perm -u+x 2>/dev/null | head -n1 || true)"
+    if [[ -n "$found" ]]; then
+      dirname "$found"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+resolve_opencode_cmd() {
+  if [[ -n "$OPENCODE_CMD" && -x "$OPENCODE_CMD" ]]; then
+    return 0
+  fi
+
+  if have opencode; then
+    OPENCODE_CMD="$(command -v opencode)"
+    return 0
+  fi
+
+  local dir
+  if dir="$(locate_opencode_bin_dir)"; then
+    OPENCODE_CMD="$dir/opencode"
+    return 0
+  fi
+
+  return 1
+}
+
+install_opencode_if_missing() {
+  resolve_opencode_cmd || true
+
+  if [[ -n "$OPENCODE_CMD" ]]; then
     return 0
   fi
 
@@ -39,7 +95,11 @@ install_opencode_if_missing() {
   # Official installer
   curl -fsSL https://opencode.ai/install | bash
 
-  have opencode || die "OpenCode installation finished, but 'opencode' is still not in PATH"
+  resolve_opencode_cmd || true
+
+  if [[ -z "$OPENCODE_CMD" ]]; then
+    die "OpenCode installation finished, but 'opencode' binary was not found"
+  fi
 }
 
 backup_existing_pack_if_present() {
@@ -137,13 +197,13 @@ print_path_hint() {
 }
 
 smoke_check() {
-  if ! have opencode; then
+  if ! resolve_opencode_cmd; then
     return 0
   fi
 
   log "Running smoke check: opencode agent list (areczek*)"
   local output
-  output="$(OPENCODE_CONFIG_DIR="$PACK_DIR" opencode agent list 2>/dev/null || true)"
+  output="$(OPENCODE_CONFIG_DIR="$PACK_DIR" "$OPENCODE_CMD" agent list 2>/dev/null || true)"
   printf "%s\n" "$output" | grep -i "areczek" || true
 
   local -a expected_agents
