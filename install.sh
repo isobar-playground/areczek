@@ -147,7 +147,7 @@ smoke_check() {
   printf "%s\n" "$output" | grep -i "areczek" || true
 
   local -a expected_agents
-  expected_agents=(areczek areczek-reviewer areczek-backend)
+  expected_agents=(areczek januszek aireczek anetka)
   local missing=()
   for agent in "${expected_agents[@]}"; do
     if ! printf "%s\n" "$output" | grep -qi "$agent"; then
