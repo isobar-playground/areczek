@@ -4,7 +4,7 @@ set -euo pipefail
 # Areczek OpenCode Pack installer (latest stable)
 # Installs:
 # - Pack to:   ~/.config/opencode-packs/areczek
-# - Wrapper:   ~/.local/bin/opencode-areczek
+# - Wrapper:   ~/.local/bin/areczek
 # Also installs OpenCode if missing.
 #
 # By default, downloads the pack from the latest GitHub Release asset.
@@ -18,7 +18,7 @@ PACK_ASSET="areczek-pack.tgz"
 PACK_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/opencode-packs"
 PACK_DIR="$PACK_ROOT/$PACK_NAME"
 BIN_DIR="$HOME/.local/bin"
-WRAPPER_PATH="$BIN_DIR/opencode-areczek"
+WRAPPER_PATH="$BIN_DIR/areczek"
 OPENCODE_CMD=""
 
 log()  { printf '%s\n' "$*"; }
@@ -186,12 +186,12 @@ EOF
 }
 
 print_path_hint() {
-  if have opencode-areczek; then
+  if have areczek; then
     return 0
   fi
 
   log ""
-  log "NOTE: 'opencode-areczek' is not on your PATH yet."
+  log "NOTE: 'areczek' is not on your PATH yet."
   log "Add this to your shell config (zsh/bash) and restart the terminal:"
   log "  export PATH=\"$BIN_DIR:\$PATH\""
 }
@@ -292,10 +292,6 @@ main() {
   install_wrapper
   smoke_check
   print_path_hint
-
-  log ""
-  log "Done. Run: opencode-areczek"
-  log ""
   print_areczek_ascii
 }
 

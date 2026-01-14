@@ -1,6 +1,6 @@
 # areczek — OpenCode pack
 
-Globalny “pack” dla OpenCode (agent `areczek` + subagenty + własne toole) instalowany jednym poleceniem i uruchamiany przez wrapper `opencode-areczek`.
+Globalny “pack” dla OpenCode (agent `areczek` + subagenty + własne toole) instalowany jednym poleceniem i uruchamiany przez wrapper `areczek`.
 
 ## Szybki start (użytkownik)
 
@@ -14,7 +14,7 @@ Globalny “pack” dla OpenCode (agent `areczek` + subagenty + własne toole) i
 To polecenie:
 - zainstaluje OpenCode (jeśli nie masz `opencode` w PATH)
 - zainstaluje/zaaktualizuje pack do `~/.config/opencode-packs/areczek`
-- zainstaluje wrapper `~/.local/bin/opencode-areczek`
+- zainstaluje wrapper `~/.local/bin/areczek`
 
 ```bash
 curl -fsSL https://github.com/isobar-playground/areczek/releases/latest/download/install.sh | bash
@@ -23,7 +23,7 @@ curl -fsSL https://github.com/isobar-playground/areczek/releases/latest/download
 ### Uruchomienie
 
 ```bash
-opencode-areczek
+areczek
 ```
 
 Wrapper ustawia `OPENCODE_CONFIG_DIR=~/.config/opencode-packs/areczek` i odpala `opencode --agent areczek`.
@@ -31,13 +31,13 @@ Wrapper ustawia `OPENCODE_CONFIG_DIR=~/.config/opencode-packs/areczek` i odpala 
 Możesz też przekazać argumenty bezpośrednio do OpenCode, np.:
 
 ```bash
-opencode-areczek --continue
-opencode-areczek run "Wyjaśnij jak działa ten projekt"
+areczek --continue
+areczek run "Wyjaśnij jak działa ten projekt"
 ```
 
 ### PATH na macOS
 
-Jeśli po instalacji `opencode-areczek` nie jest dostępny, dodaj do `~/.zshrc` (lub `~/.bashrc`):
+Jeśli po instalacji `areczek` nie jest dostępny, dodaj do `~/.zshrc` (lub `~/.bashrc`):
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -99,7 +99,7 @@ Jeśli pack już istnieje, instalator robi backup katalogu:
 
 Usuń wrapper:
 
-- `~/.local/bin/opencode-areczek`
+- `~/.local/bin/areczek`
 
 Usuń pack:
 
