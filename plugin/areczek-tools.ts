@@ -1,5 +1,5 @@
 import { type Plugin } from "@opencode-ai/plugin"
-import jiraSummary from "./jira-summary.ts"
+import jiraSummary from "../tool/jira-summary.ts"
 
 const AreczekTools: Plugin = async () => {
   return {
